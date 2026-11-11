@@ -88,25 +88,29 @@ CODE/
 
 ## Environment
 
-Create `.env` in the `CODE` folder:
+Create `.env` in the `CODE` folder (or copy from `.env.example`):
 
 ```env
 APP_NAME=Investment Guidance AI
 DEBUG=true
 
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
+SECRET_KEY=replace-with-a-random-secret-of-at-least-32-characters
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-GEMINI_MODEL=YOUR_SUPPORTED_GEMINI_MODEL
-GEMINI_FALLBACK_MODEL=YOUR_SUPPORTED_FALLBACK_MODEL
+# Persistent SQLite database
+DATABASE_URL=sqlite:///./DATA_BASE/investment.db
 
+# Gemini AI
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+GEMINI_MODEL=gemini-2.5-flash
+GEMINI_FALLBACK_MODEL=
+
+# Flask frontend
 BACKEND_URL=http://127.0.0.1:8000
+FRONTEND_ORIGIN=http://127.0.0.1:5000
 FLASK_HOST=127.0.0.1
 FLASK_PORT=5000
 FLASK_DEBUG=true
-SECRET_KEY=your-flask-secret
 ```
 
 Never upload `.env` or API keys to GitHub.
@@ -116,31 +120,40 @@ Never upload `.env` or API keys to GitHub.
 From the `CODE` folder:
 ```cmd
 pip install uv
-```cmd
 uv sync
 .venv\Scripts\activate
 ```
 
 Install the dependencies defined in `pyproject.toml`.
 
-## Run Backend
+## Database Setup
 
+Apply Alembic migrations to set up the SQLite database:
 ```cmd
-cd BACKEND
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+uv run alembic -c BACKEND\alembic.ini upgrade head
 ```
 
-Backend: `http://127.0.0.1:8000`
+## Running the Application
 
+### Option 1: Quick Launch (All-in-one)
+Double-click `run_all.bat` in the `CODE` folder.
+
+### Option 2: Run Separately in Two Terminals
+
+**Terminal 1 - FastAPI Backend:**
+```cmd
+cd CODE
+set PYTHONPATH=%CD%\BACKEND
+.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+Backend: `http://127.0.0.1:8000`  
 API documentation: `http://127.0.0.1:8000/docs`
 
-## Run Frontend
-
-Open another Command Prompt:
-
+**Terminal 2 - Flask Frontend:**
 ```cmd
-cd FRONTEND
-uv run app.py
+cd CODE\FRONTEND
+..\.venv\Scripts\python.exe app.py
 ```
 
 Frontend: `http://127.0.0.1:5000`
