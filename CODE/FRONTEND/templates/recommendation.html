@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Recommendation — Investment Guidance AI{% endblock %}
+{% block content %}
+{% set final_result = analysis.get('final_response', {}) if analysis else {} %}
+{% set analysis_complete = final_result.get('status') == 'complete' %}
+<div class="dashboard-hero compact-hero"><div><span class="eyebrow">RECOMMENDATION</span><h1>{{ goal.name if goal else 'Investment recommendation' }}</h1><p>Review the calculated allocation, scenario outcomes, reasoning and assumptions before making any decision.</p></div><div class="hero-actions"><a class="btn secondary" href="{{ url_for('what_if') }}">What-if</a><a class="btn primary" href="{{ url_for('chat') }}">Ask AI</a></div></div>
+{% if not analysis_complete %}<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div><h2>{% if analysis %}Analysis did not complete{% else %}No completed analysis{% endif %}</h2><p>Run the multi-agent workflow first. Your calculated recommendation will appear here.</p><a class="btn primary" href="{{ url_for('analysis') }}">Run AI analysis</a></div>{% else %}
+<div class="recommendation-banner"><div><span class="eyebrow">RECOMMENDED DIRECTION</span><h2 id="summaryText">Analysis completed.</h2><p>Educational decision support only. Review assumptions and risks before acting.</p></div><span class="confidence-pill" id="confidenceText">Guidance ready</span></div>
+<div class="grid-2"><section class="panel"><div class="panel-head"><div><span class="eyebrow">PORTFOLIO</span><h3>Recommended allocation</h3></div><span class="data-tag">Calculated</span></div><div id="allocationChart" class="chart-box"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">SCENARIOS</span><h3>Projected outcomes</h3></div><span class="data-tag">What-if ready</span></div><div id="scenarioChart" class="chart-box"></div></section></div>
+<div class="grid-2"><section class="panel"><div class="panel-head"><div><span class="eyebrow">WHY</span><h3>Why this strategy</h3></div></div><div id="whyText" class="rich-text">The recommendation follows the selected risk category and deterministic projections.</div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">RISK</span><h3>Key risks</h3></div></div><div id="riskText" class="rich-text">Review volatility, inflation, assumptions and the possibility that actual outcomes differ.</div></section></div>
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">MARKET CONTEXT</span><h3>Research used by the workflow</h3></div><span class="badge green">Grounded when available</span></div><div id="marketText" class="rich-text">Current public market context is included when the grounded Gemini pass succeeds.</div></section>
+<details class="panel details"><summary>Assumptions and data freshness</summary><div id="assumptionsText" class="rich-text">Scenario assumptions and data freshness are supplied by the analysis result.</div></details>
+<script>window.ANALYSIS_DATA={{ analysis|tojson }};</script>
+{% endif %}
+{% endblock %}

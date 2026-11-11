@@ -1,0 +1,524 @@
+============================================================
+INVESTWISE AI - PULL AND COMPLETE SETUP GUIDE
+============================================================
+
+Purpose:
+Use this file on a new/student laptop after the project has
+already been pushed to GitHub.
+
+This setup uses:
+- Git
+- uv (Python package/environment manager)
+- FastAPI backend
+- Flask frontend
+- SQLite
+- Gemini API
+
+IMPORTANT:
+1. .env is NOT stored in GitHub.
+2. .venv is NOT stored in GitHub.
+3. SQLite database files are NOT stored in GitHub.
+4. The student must create a new .env and provide a Gemini API key.
+5. Run these commands from Windows CMD unless stated otherwise.
+
+============================================================
+1. REQUIREMENTS
+============================================================
+
+Install these on the student laptop:
+
+- Git
+- uv
+- Python 3.11 or 3.12
+
+Check:
+
+    git --version
+    uv --version
+    python --version
+
+If uv is not installed, install it using the official uv installer
+or your normal company/student software installation method.
+
+============================================================
+2. CLONE THE GITHUB PROJECT
+============================================================
+
+Open CMD and choose the location where the project should be stored.
+
+Example:
+
+    cd C:\Users\Student\Desktop
+
+Clone:
+
+    git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+
+Enter the project:
+
+    cd YOUR_REPOSITORY
+
+IMPORTANT:
+Replace YOUR_USERNAME/YOUR_REPOSITORY with the real GitHub repository.
+
+Check:
+
+    git status
+
+============================================================
+3. CREATE THE PYTHON ENVIRONMENT USING UV
+============================================================
+
+If the repository contains pyproject.toml:
+
+    uv sync
+
+This creates/updates the project environment and installs the
+dependencies declared in pyproject.toml.
+
+If the project DOES NOT contain pyproject.toml but contains:
+
+    BACKEND\requirements.txt
+
+use:
+
+    uv venv .venv
+
+Then install the requirements:
+
+    uv pip install --python .venv\Scripts\python.exe -r BACKEND\requirements.txt
+
+If your project has a separate frontend requirements file, install
+that too only if it exists:
+
+    uv pip install --python .venv\Scripts\python.exe -r FRONTEND\requirements.txt
+
+Do NOT create another environment manually if .venv already exists.
+
+============================================================
+4. VERIFY THE UV ENVIRONMENT
+============================================================
+
+Run:
+
+    .venv\Scripts\python.exe --version
+
+Then:
+
+    .venv\Scripts\python.exe -c "import fastapi; print('FastAPI OK')"
+
+Then:
+
+    .venv\Scripts\python.exe -c "import flask; print('Flask OK')"
+
+Then:
+
+    .venv\Scripts\python.exe -c "from google import genai; print('Google GenAI OK')"
+
+If all three work, the main Python packages are available.
+
+============================================================
+5. CREATE THE .ENV FILE
+============================================================
+
+The .env file must be created manually on the student laptop.
+
+Location:
+
+    PROJECT_ROOT\.env
+
+Example:
+
+    APP_NAME=Investment Guidance AI
+    DEBUG=true
+
+    JWT_SECRET_KEY=CHANGE_THIS_SECRET
+    JWT_ALGORITHM=HS256
+    ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+    GEMINI_API_KEY=PUT_REAL_GEMINI_API_KEY_HERE
+    GEMINI_MODEL=YOUR_SUPPORTED_GEMINI_MODEL
+    GEMINI_FALLBACK_MODEL=YOUR_SUPPORTED_FALLBACK_MODEL
+
+    BACKEND_URL=http://127.0.0.1:8000
+    FLASK_HOST=127.0.0.1
+    FLASK_PORT=5000
+    FLASK_DEBUG=true
+    SECRET_KEY=CHANGE_THIS_FLASK_SECRET
+
+IMPORTANT:
+- Do NOT commit .env.
+- Do NOT put the Gemini API key in GitHub.
+- Do NOT paste the API key into README.md.
+- Use a separate API key for the student machine if possible.
+
+If the repository contains .env.example, create .env from it:
+
+    copy .env.example .env
+
+Then edit .env and enter the real Gemini API key.
+
+============================================================
+6. VERIFY THE .ENV FILE
+============================================================
+
+From the project root:
+
+    .venv\Scripts\python.exe -c "from dotenv import dotenv_values; from pathlib import Path; p=Path('.env'); v=dotenv_values(p); print('ENV EXISTS:', p.exists()); print('GEMINI KEY FOUND:', bool(v.get('GEMINI_API_KEY'))); print('GEMINI MODEL:', v.get('GEMINI_MODEL'))"
+
+Expected:
+
+    ENV EXISTS: True
+    GEMINI KEY FOUND: True
+    GEMINI MODEL: <your configured model>
+
+If GEMINI KEY FOUND is False:
+stop and fix .env before starting the application.
+
+============================================================
+7. SET PYTHONPATH FOR THE FASTAPI BACKEND
+============================================================
+
+From the project root:
+
+    set PYTHONPATH=%CD%\BACKEND
+
+This is required for the current project structure where the backend
+application package is under BACKEND\app.
+
+IMPORTANT:
+This SET command applies only to the current CMD window.
+
+============================================================
+8. DATABASE
+============================================================
+
+The project uses SQLite.
+
+Do NOT copy your development database to the student laptop.
+
+Because SQLite files are ignored by Git, the student machine should
+have its own local database.
+
+If the application already initializes the database during startup,
+simply start the backend.
+
+If the project has a documented database initialization command,
+run that command before starting the backend.
+
+If database initialization is not automatic, check:
+
+    BACKEND\app\database\database.py
+
+and use the project's existing initialization function.
+
+Do NOT invent a new database schema on the student machine.
+
+============================================================
+9. START FASTAPI BACKEND
+============================================================
+
+From the project root:
+
+    set PYTHONPATH=%CD%\BACKEND
+
+Then start:
+
+    .venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+If your repository's FastAPI entry point is different, use the entry
+point documented in README.md.
+
+Expected:
+
+    Uvicorn running on http://127.0.0.1:8000
+
+Keep this CMD window open.
+
+============================================================
+10. TEST FASTAPI
+============================================================
+
+Open the browser:
+
+    http://127.0.0.1:8000/docs
+
+You should see the FastAPI Swagger/OpenAPI page.
+
+If the backend does not start:
+- read the traceback in the CMD window
+- verify .env
+- verify uv dependencies
+- verify PYTHONPATH
+- verify the FastAPI entry point
+
+============================================================
+11. START FLASK FRONTEND
+============================================================
+
+Open a SECOND CMD window.
+
+Go to the project root:
+
+    cd C:\PATH\TO\YOUR_REPOSITORY
+
+The backend CMD window must remain running.
+
+If the frontend entry point is FRONTEND\app.py:
+
+    .venv\Scripts\python.exe FRONTEND\app.py
+
+If the repository has a different Flask entry file, use the file
+specified in README.md.
+
+Expected:
+
+    Running on http://127.0.0.1:5000
+
+Open:
+
+    http://127.0.0.1:5000
+
+============================================================
+12. APPLICATION CHECK
+============================================================
+
+Test the following:
+
+    [ ] Login/Register page opens
+    [ ] User registration works
+    [ ] Login works
+    [ ] Dashboard opens
+    [ ] Goal creation works
+    [ ] Financial profile works
+    [ ] Risk assessment works
+    [ ] Investment analysis works
+    [ ] Recommendation page works
+    [ ] Scenario/What-if page works
+    [ ] Chat page opens
+    [ ] Gemini responds to chat
+    [ ] SQLite data is saved locally
+    [ ] Logout works
+
+============================================================
+13. CHAT / GEMINI CHECK
+============================================================
+
+If the chatbot shows:
+
+    Thinking...
+
+for a long time or returns a Gemini unavailable error:
+
+First check .env:
+
+    .venv\Scripts\python.exe -c "from dotenv import dotenv_values; v=dotenv_values('.env'); print(bool(v.get('GEMINI_API_KEY'))); print(v.get('GEMINI_MODEL'))"
+
+Then check that the Google GenAI SDK is installed:
+
+    .venv\Scripts\python.exe -c "from google import genai; print('Google GenAI SDK OK')"
+
+Then check the FastAPI terminal for the actual error.
+
+Do not replace Gemini with hardcoded chatbot responses.
+
+============================================================
+14. DAILY USE AFTER THE PROJECT IS ALREADY INSTALLED
+============================================================
+
+You do NOT need to clone the project again.
+
+From the project folder:
+
+    git pull
+
+If dependencies changed and the project has pyproject.toml:
+
+    uv sync
+
+If requirements.txt changed:
+
+    uv pip install --python .venv\Scripts\python.exe -r BACKEND\requirements.txt
+
+Then start FastAPI:
+
+    set PYTHONPATH=%CD%\BACKEND
+    .venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Open another CMD and start Flask:
+
+    .venv\Scripts\python.exe FRONTEND\app.py
+
+============================================================
+15. IMPORTANT GIT RULES
+============================================================
+
+NEVER push:
+
+    .env
+    .venv\
+    *.db
+    *.sqlite
+    *.sqlite3
+    __pycache__\
+    API keys
+    passwords
+    JWT secrets
+    generated model weights
+    temporary files
+
+The repository should contain:
+
+    source code
+    templates
+    CSS
+    JavaScript
+    requirements.txt / pyproject.toml
+    README.md
+    .gitignore
+    .env.example
+
+============================================================
+16. IF THE PROJECT WAS UPDATED ON GITHUB
+============================================================
+
+On the student laptop:
+
+    git pull
+
+If Git reports local changes:
+
+    git status
+
+Do NOT blindly use:
+
+    git reset --hard
+
+because that can delete local work.
+
+If the student has no local changes and you intentionally want the
+local project to exactly match GitHub, first confirm that no work
+needs to be kept.
+
+============================================================
+17. RECOMMENDED PROJECT FILES FOR EASY SETUP
+============================================================
+
+Your GitHub repository should ideally contain:
+
+    .gitignore
+    .env.example
+    README.md
+    pyproject.toml        (if using uv project management)
+
+    BACKEND\
+        requirements.txt  (if requirements.txt is still used)
+        app\
+
+    FRONTEND\
+        app.py
+        templates\
+        static\
+
+    DATA_BASE\
+
+Do NOT commit:
+
+    .env
+    .venv\
+    *.db
+
+============================================================
+18. QUICK COMPLETE SETUP
+============================================================
+
+For a fresh laptop, the overall sequence is:
+
+    git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+
+    cd YOUR_REPOSITORY
+
+If pyproject.toml exists:
+
+    uv sync
+
+Otherwise:
+
+    uv venv .venv
+    uv pip install --python .venv\Scripts\python.exe -r BACKEND\requirements.txt
+
+Then:
+
+    copy .env.example .env
+
+Edit .env and add the Gemini API key.
+
+Then start FastAPI:
+
+    set PYTHONPATH=%CD%\BACKEND
+    .venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Open a second CMD:
+
+    cd C:\PATH\TO\YOUR_REPOSITORY
+    .venv\Scripts\python.exe FRONTEND\app.py
+
+Open:
+
+    http://127.0.0.1:5000
+
+============================================================
+19. IMPORTANT NOTE ABOUT UV
+============================================================
+
+uv is used here as the Python environment/dependency manager.
+
+It replaces the need for a manual:
+
+    python -m venv
+    pip install ...
+
+workflow when the project uses pyproject.toml.
+
+Preferred:
+
+    uv sync
+
+For an existing requirements.txt based project:
+
+    uv venv .venv
+    uv pip install --python .venv\Scripts\python.exe -r BACKEND\requirements.txt
+
+Do not mix several different Python environments.
+
+Use the project's .venv consistently.
+
+============================================================
+20. FINAL RESULT
+============================================================
+
+After setup:
+
+    Browser
+       |
+       v
+    Flask :5000
+       |
+       v
+    FastAPI :8000
+       |
+       +------> SQLite
+       |
+       +------> Gemini API
+
+The student laptop has its own:
+
+    .venv
+    .env
+    SQLite database
+
+while GitHub contains the shared application source code.
+
+============================================================
+END
+============================================================

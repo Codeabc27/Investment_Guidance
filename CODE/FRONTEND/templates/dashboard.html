@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Overview — Investment Guidance AI{% endblock %}
+{% block content %}
+{% set final_result = analysis.get('final_response', {}) if analysis else {} %}
+{% set analysis_complete = final_result.get('status') == 'complete' %}
+{% if profile_message %}<div class="alert {{ 'success' if profile_message.type == 'success' else 'warning' }}">{{ profile_message.text }}</div>{% endif %}
+<div class="dashboard-hero">
+  <div><span class="eyebrow">OVERVIEW</span><h1>Welcome back, {{ display_name.split(' ')[0] }}</h1><p>Review your active goal, financial readiness and the next step in your investment planning workflow.</p></div>
+  <div class="hero-actions"><a class="btn secondary" href="{{ url_for('goals') }}">Manage goals</a>{% if goal %}<a class="btn primary" href="{{ url_for('analysis') }}">Run AI analysis</a>{% endif %}</div>
+</div>
+{% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+{% if not goal %}
+<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></div><h2>Start with an investment goal</h2><p>Create a target, contribution and horizon. The analysis workflow will use that goal as its planning anchor.</p><a class="btn primary" href="{{ url_for('goals') }}">Create your first goal</a></div>
+{% else %}
+<div class="goal-picker"><div class="goal-picker-left"><span class="data-tag">ACTIVE GOAL</span><strong>{{ goal.name }}</strong></div><form method="post" action="{{ url_for('select_goal') }}"><select name="goal_id" onchange="this.form.submit()">{% for g in goals %}<option value="{{ g.id }}" {% if g.id == goal.id %}selected{% endif %}>{{ g.name }}</option>{% endfor %}</select></form></div>
+
+<div class="overview-grid">
+  <section class="balance-card">
+    <div class="balance-top"><div><span class="eyebrow light">CURRENT PROGRESS</span><h2>₹{{ "{:,.0f}".format(goal.current_amount or 0) }}</h2><div class="balance-sub">of ₹{{ "{:,.0f}".format(goal.target_amount or 0) }} target</div></div><span class="soft-badge">{{ goal.goal_type|title }}</span></div>
+    <div id="goalProjectionChart" class="balance-chart"></div>
+    <div class="balance-foot"><span>Monthly <b>₹{{ "{:,.0f}".format(goal.monthly_contribution or 0) }}</b></span><span>Horizon <b>{{ goal.horizon_years }} yrs</b></span><span>Progress <b>{{ '%.0f'|format(((goal.current_amount or 0)/(goal.target_amount or 1))*100) }}%</b></span></div>
+  </section>
+  <section class="side-stat-card">
+    <div class="side-stat-top"><span class="eyebrow">GOAL HEALTH</span><span class="score-ring">{{ '%.0f'|format(((goal.current_amount or 0)/(goal.target_amount or 1))*100) }}%</span></div>
+    <div class="big-number">₹{{ "{:,.0f}".format((goal.target_amount or 0) - (goal.current_amount or 0)) }}</div><p>remaining to target</p>
+    <div class="progress"><span style="width:{{ [100, ((goal.current_amount or 0)/(goal.target_amount or 1))*100]|min }}%"></span></div>
+    <div class="stat-row"><span>Risk profile</span><b>{{ risk.get('category','Not assessed')|title }}</b></div>
+    <div class="stat-row"><span>Plan status</span><b>{% if analysis_complete %}Analysis ready{% elif analysis %}Analysis incomplete{% else %}Analysis pending{% endif %}</b></div>
+    <div class="stat-row"><span>Goal type</span><b>{{ goal.goal_type|title }}</b></div>
+  </section>
+</div>
+
+<div class="section-heading"><div><span class="eyebrow">PLAN, ANALYZE AND IMPROVE</span><h2>Choose your next step</h2></div><a class="text-link" href="{{ url_for('chat') }}">Ask AI →</a></div>
+<div class="feature-grid">
+  <a href="{{ url_for('analysis') }}" class="feature-card featured"><span class="feature-icon"><svg viewBox="0 0 24 24"><path d="M5 19V5M5 19h14"/><path d="m8 15 3-4 3 2 4-6"/></svg></span><div><b>AI Analysis</b><p>Run the multi-agent workflow and review your planning context.</p></div><span class="arrow">→</span></a>
+  <a href="{{ url_for('recommendation') }}" class="feature-card"><span class="feature-icon green"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><div><b>Recommendation</b><p>Review allocation, scenarios, reasoning and key risks.</p></div><span class="arrow">→</span></a>
+  <a href="{{ url_for('what_if') }}" class="feature-card"><span class="feature-icon orange"><svg viewBox="0 0 24 24"><path d="M6 6h12M6 12h8M6 18h12"/><circle cx="17" cy="12" r="2"/></svg></span><div><b>What-if planning</b><p>Test contribution and horizon changes before deciding.</p></div><span class="arrow">→</span></a>
+</div>
+
+<div class="dashboard-lower">
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">RECENT ACTIVITY</span><h3>Your planning activity</h3></div><span class="data-tag">Workspace</span></div>
+  <div class="activity-item"><span class="activity-icon blue"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg></span><div><b>Goal selected</b><small>{{ goal.name }} is your active planning goal.</small></div><span class="activity-time">Now</span></div>
+  <div class="activity-item"><span class="activity-icon purple"><svg viewBox="0 0 24 24"><path d="M5 19V5M5 19h14"/><path d="m8 15 3-4 3 2 4-6"/></svg></span><div><b>AI analysis</b><small>{% if analysis_complete %}Latest analysis is available.{% elif analysis %}Latest analysis did not complete.{% else %}Run analysis to generate a recommendation.{% endif %}</small></div><span class="activity-time">{% if analysis_complete %}Ready{% elif analysis %}Retry{% else %}Pending{% endif %}</span></div>
+  <div class="activity-item"><span class="activity-icon green"><svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16"/></svg></span><div><b>Monthly plan</b><small>₹{{ "{:,.0f}".format(goal.monthly_contribution or 0) }} contribution toward your target.</small></div><span class="activity-time">Plan</span></div>
+</section>
+<section class="panel"><div class="panel-head"><div><span class="eyebrow">PLANNING PROFILE</span><h3>Financial readiness</h3></div><span class="badge {% if risk.get('category') == 'aggressive' %}red{% elif risk.get('category') == 'conservative' %}amber{% else %}green{% endif %}">{{ risk.get('category','Not assessed')|title }}</span></div>
+  <div class="profile-metrics"><div><span>Income</span><b>₹{{ "{:,.0f}".format(financial_profile.get('monthly_income',0) or 0) }}</b></div><div><span>Expenses</span><b>₹{{ "{:,.0f}".format(financial_profile.get('monthly_expenses',0) or 0) }}</b></div><div><span>Savings</span><b>₹{{ "{:,.0f}".format(financial_profile.get('total_savings',goal.current_amount or 0) or 0) }}</b></div><div><span>Investments</span><b>₹{{ "{:,.0f}".format(financial_profile.get('existing_investments',0) or 0) }}</b></div></div>
+  <div class="profile-actions"><a class="btn secondary" href="#financialProfile">Update finances</a><a class="btn secondary" href="#riskProfile">Update risk</a></div>
+</section>
+</div>
+
+<section class="panel inline-profile" id="financialProfile"><div class="panel-head"><div><span class="eyebrow">FINANCIAL CONTEXT</span><h3>Keep your planning numbers current</h3></div><span class="data-tag">Used by analysis</span></div>
+<form method="post" action="{{ url_for('financial_profile') }}" class="form compact-grid"><label>Monthly income<input name="monthly_income" type="number" min="0" value="{{ financial_profile.get('monthly_income',75000) }}"></label><label>Monthly expenses<input name="monthly_expenses" type="number" min="0" value="{{ financial_profile.get('monthly_expenses',40000) }}"></label><label>Total savings<input name="total_savings" type="number" min="0" value="{{ financial_profile.get('total_savings',goal.current_amount or 0) }}"></label><label>Existing investments<input name="existing_investments" type="number" min="0" value="{{ financial_profile.get('existing_investments',300000) }}"></label><label>Emergency fund<input name="emergency_fund" type="number" min="0" value="{{ financial_profile.get('emergency_fund',150000) }}"></label><label>Liabilities / debt<input name="liabilities" type="number" min="0" value="{{ financial_profile.get('liabilities',0) }}"></label><input type="hidden" name="full_name" value="{{ financial_profile.get('full_name',display_name) }}"><button class="btn primary full-field" type="submit">Save financial context</button></form></section>
+
+<section class="panel inline-profile" id="riskProfile"><div class="panel-head"><div><span class="eyebrow">RISK PREFERENCES</span><h3>Set your investment comfort level</h3></div><span class="data-tag">Guidance constraint</span></div>
+<form method="post" action="{{ url_for('risk') }}" class="form compact-grid"><label>Experience<select name="investment_experience"><option value="beginner" {% if risk.get('answers',{}).get('investment_experience') == 'beginner' %}selected{% endif %}>Beginner</option><option value="intermediate" {% if risk.get('answers',{}).get('investment_experience') == 'intermediate' %}selected{% endif %}>Intermediate</option><option value="advanced" {% if risk.get('answers',{}).get('investment_experience') == 'advanced' %}selected{% endif %}>Advanced</option></select></label><label>Risk tolerance<select name="risk_tolerance"><option value="low" {% if risk.get('answers',{}).get('risk_tolerance') == 'low' %}selected{% endif %}>Low</option><option value="moderate" {% if risk.get('answers',{}).get('risk_tolerance','moderate') == 'moderate' %}selected{% endif %}>Moderate</option><option value="high" {% if risk.get('answers',{}).get('risk_tolerance') == 'high' %}selected{% endif %}>High</option></select></label><label>Loss tolerance <span class="range-value" id="lossValue">{{ risk.get('answers',{}).get('loss_tolerance_percent',15) }}%</span><input type="range" name="loss_tolerance" min="0" max="50" value="{{ risk.get('answers',{}).get('loss_tolerance_percent',15) }}" oninput="document.getElementById('lossValue').textContent=this.value+'%'" ></label><label>Horizon (years)<input name="horizon_years" type="number" min="0.5" step="0.5" value="{{ risk.get('answers',{}).get('investment_horizon_years',goal.horizon_years or 6) }}"></label><label>Emergency reserve<select name="emergency_reserve"><option value="yes" {% if risk.get('answers',{}).get('emergency_reserve') == 'yes' %}selected{% endif %}>Yes</option><option value="partly" {% if risk.get('answers',{}).get('emergency_reserve','partly') == 'partly' %}selected{% endif %}>Partly</option><option value="no" {% if risk.get('answers',{}).get('emergency_reserve') == 'no' %}selected{% endif %}>No</option></select></label><button class="btn primary" type="submit">Save risk profile</button></form></section>
+<script>window.DASHBOARD_DATA={current:{{ goal.current_amount or 0 }},target:{{ goal.target_amount or 0 }},monthly:{{ goal.monthly_contribution or 0 }},years:{{ goal.horizon_years or 1 }}};</script>
+{% endif %}
+{% endblock %}
