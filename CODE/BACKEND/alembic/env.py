@@ -8,8 +8,8 @@ from sqlalchemy import engine_from_config, pool
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
-from app.config import DATABASE_PATH, settings  # noqa: E402
-from app.database.models import metadata  # noqa: E402
+from app.config import DATABASE_PATH
+from app.database.models import metadata
 
 config = context.config
 db_url = f"sqlite:///{DATABASE_PATH.as_posix()}"
