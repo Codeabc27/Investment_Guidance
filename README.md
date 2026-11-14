@@ -1,231 +1,56 @@
 # InvestWise AI
 
-## Multi-Agent LLM-Based System for Goal-Oriented Investment Guidance
+InvestWise AI is an educational investment-planning application built with a
+Flask frontend, a FastAPI backend, deterministic financial calculations, and
+Gemini-generated explanations.
 
-InvestWise AI is a student-focused Generative AI project that provides personalized and explainable investment guidance based on financial goals, investment horizon, financial profile, and risk tolerance.
-
-> **Disclaimer:** For educational and academic purposes only. This system does not provide professional financial advice or guarantee investment returns.
+> **Disclaimer:** This project is for educational purposes only. Its projections
+> and allocation examples are illustrative, are not professional financial
+> advice, and do not guarantee returns.
 
 ## Features
 
-- User registration and login
-- Financial profile and investment goals
-- Risk assessment
-- Multi-agent AI analysis
-- Gemini-powered explanations and chat
-- Market research
-- Portfolio allocation suggestions
-- Investment projections
-- What-if scenario analysis
-- Recommendation validation
-- Dashboard and analysis history
+- User registration, login, and token-based authentication.
+- Financial profiles, investment goals, and risk assessments.
+- Multi-agent analysis and what-if investment projections.
+- Contextual chat and Gemini-generated explanations.
+- SQLite persistence with Alembic-managed schema migrations.
 
-## Multi-Agent Workflow
+Python performs financial projections; Gemini provides explanations and
+conversational responses. Portfolio allocations and scenario assumptions are
+simplified examples, not optimized investment advice.
 
-```text
-User
- ↓
-Investment Goal
- ↓
-Financial Profile
- ↓
-Risk Assessment
- ↓
-Goal Agent
- ↓
-Financial Agent
- ↓
-Market Research Agent
- ↓
-Risk Agent
- ↓
-Portfolio Agent
- ↓
-Scenario Agent
- ↓
-Validation Agent
- ↓
-Final Guidance
-```
+## Quick start
 
-Python performs deterministic financial calculations. Gemini is used for reasoning, explanation, market context, and chat.
+See the [CODE project README](CODE/README.md) for prerequisites, configuration,
+database setup, API details, and the complete development instructions.
 
-## Technology Stack
+In brief, from the repository root:
 
-| Component | Technology |
-|---|---|
-| Frontend | Flask, HTML, CSS, JavaScript |
-| Backend | FastAPI |
-| Database | SQLite |
-| AI | Google Gemini |
-| Calculations | Python |
-| Charts | Plotly / JavaScript |
-| Authentication | JWT |
-| Server | Uvicorn |
+1. Follow the project README to install `uv` and create `CODE/.env` from
+   `CODE/.env.example`. Set your own Gemini API key and a randomly generated
+   secret key; never commit `.env` or credentials.
+2. Install dependencies and apply database migrations:
 
-## Project Structure
+   ```powershell
+   Set-Location CODE
+   uv sync
+   uv run alembic -c BACKEND\alembic.ini upgrade head
+   ```
 
-```text
-CODE/
-├── BACKEND/
-│   └── app/
-│       ├── api/
-│       ├── agents/
-│       ├── services/
-│       ├── schemas/
-│       ├── database/
-│       └── main.py
-├── FRONTEND/
-│   ├── templates/
-│   └── static/
-├── DATA_BASE/
-├── .env
-├── .env.example
-├── .gitignore
-├── pyproject.toml
-└── README.md
-```
+3. Start the backend and frontend in separate terminals, following the run
+   instructions in [CODE/README.md](CODE/README.md).
 
-## Environment
+## Limitations
 
-Create `.env` in the `CODE` folder (or copy from `.env.example`):
-
-```env
-APP_NAME=Investment Guidance AI
-DEBUG=true
-
-SECRET_KEY=replace-with-a-random-secret-of-at-least-32-characters
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-
-# Persistent SQLite database
-DATABASE_URL=sqlite:///./DATA_BASE/investment.db
-
-# Gemini AI
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-GEMINI_MODEL=gemini-2.5-flash
-GEMINI_FALLBACK_MODEL=
-
-# Flask frontend
-BACKEND_URL=http://127.0.0.1:8000
-FRONTEND_ORIGIN=http://127.0.0.1:5000
-FLASK_HOST=127.0.0.1
-FLASK_PORT=5000
-FLASK_DEBUG=true
-```
-
-Never upload `.env` or API keys to GitHub.
-
-## Installation
-
-From the `CODE` folder:
-```cmd
-pip install uv
-uv sync
-.venv\Scripts\activate
-```
-
-Install the dependencies defined in `pyproject.toml`.
-
-## Database Setup
-
-Apply Alembic migrations to set up the SQLite database:
-```cmd
-uv run alembic -c BACKEND\alembic.ini upgrade head
-```
-
-## Running the Application
-
-### Option 1: Quick Launch (All-in-one)
-Double-click `run_all.bat` in the `CODE` folder.
-
-### Option 2: Run Separately in Two Terminals
-
-**Terminal 1 - FastAPI Backend:**
-```cmd
-cd CODE
-set PYTHONPATH=%CD%\BACKEND
-.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-```
-
-Backend: `http://127.0.0.1:8000`  
-API documentation: `http://127.0.0.1:8000/docs`
-
-**Terminal 2 - Flask Frontend:**
-```cmd
-cd CODE\FRONTEND
-..\.venv\Scripts\python.exe app.py
-```
-
-Frontend: `http://127.0.0.1:5000`
-
-## User Flow
-
-```text
-Register / Login
-      ↓
-Dashboard
-      ↓
-Create Investment Goal
-      ↓
-Financial Profile
-      ↓
-Risk Assessment
-      ↓
-AI Analysis
-      ↓
-Recommendation
-      ↓
-Scenario Analysis
-      ↓
-AI Chat
-      ↓
-History
-```
-
-## AI Chat
-
-The chat uses Gemini to answer questions using the user's goal, financial profile, and latest analysis.
-
-Gemini is used for reasoning, explanations, market context, and conversational assistance. Financial calculations are handled by Python.
-
-## What-If Analysis
-
-Users can change assumptions such as monthly contribution or investment horizon and compare projected outcomes.
-
-## Responsible AI
-
-The system:
-
-- Does not guarantee investment returns.
-- Shows important assumptions.
-- Uses validation before final guidance.
-- Does not expose private chain-of-thought.
-- Treats market information as time-sensitive.
-- Provides an educational-use disclaimer.
-
-## Academic Purpose
-
-InvestWise AI demonstrates the practical use of:
-
-- Generative AI
-- Large Language Models
-- Multi-Agent Systems
-- Financial analysis
-- Risk assessment
-- Scenario simulation
-- FastAPI
-- Flask
-- SQLite
-
-## Future Enhancements
-
-- Additional financial data providers
-- Advanced portfolio optimization
-- More asset classes
-- Personalized alerts
-- Mobile application
-- Advanced scenario simulation
+- This is an educational project, not a financial-advice or trading system.
+- Market context can be unavailable or inaccurate; independently verify
+  time-sensitive information.
+- SQLite and in-memory request limiting are intended for local or small-scale
+  use, not multi-instance production deployment.
+- Development server settings must not be exposed publicly.
 
 ## License
 
-This project is developed for academic and educational purposes.
+No project license file is present. Unless a license is added, reuse and
+redistribution permissions are not specified.
