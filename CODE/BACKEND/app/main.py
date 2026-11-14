@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
@@ -11,7 +12,7 @@ from app.api.goals import router as goals_router
 from app.api.market import router as market_router
 from app.api.risk import router as risk_router
 from app.api.what_if import router as what_if_router
-from app.config import settings, DATABASE_PATH
+from app.config import DATABASE_PATH, settings
 from app.database.models import metadata
 
 
